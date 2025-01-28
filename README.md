@@ -1,21 +1,18 @@
 # PHP Single-File Proxy Server
 
-This project provides a simple single-file PHP script to forward local websites to other devices on the same network. It supports dynamic URL rewriting in headers and response bodies, making it perfect for testing local development sites across multiple devices.
+This project provides a simple single-file PHP script to forward local websites to other devices on the same network. It supports dynamic URL rewriting in headers and response bodies.
 
 ## Motivation
 
-The goal of this project is to quickly and easily share a local website (e.g., `localhost`, `site.test`) with other devices on the same network. Unlike tools that require setup or installation, this script is a self-contained PHP solution.
+The goal of this project is to quickly and easily share a local website (e.g., `localhost`, `site.test`) with other devices on the same network. Unlike tools that require setup or installation, this script is a single-file PHP solution with no external dependencies.
 
 ---
 
 ## Features
 
-- **Dynamic Proxying**: Forwards requests to a specified target host and port.
 - **Search and Replace**: Rewrites all occurrences of the target host in response bodies (e.g., `site.test` → `192.168.0.87:8011`).
 - **Header Rewriting**: Dynamically rewrites `Location` and `Set-Cookie` headers to point to the proxy.
 - **Single File**: A lightweight, dependency-free PHP script.
-- **CLI and Router**: Acts as both a CLI script to start the server and a request router for handling proxy requests.
-
 ---
 
 ## Usage
@@ -29,7 +26,7 @@ The goal of this project is to quickly and easily share a local website (e.g., `
 Run the script from the command line, providing the target host (local site) and the proxy address (your device's IP and port):
 
 ```
-php proxy.php &lt;targetHost&gt; &lt;proxyIp:proxyPort&gt;
+php proxy.php <targetHost> <proxyIp:proxyPort>
 ```
 
 **Example**:
@@ -64,8 +61,8 @@ The script intercepts requests and performs the following transformations:
 3. **Response Body Rewriting**:
    - Replaces all occurrences of the target host in the response body:
      ```
-     &lt;a href="http://site.test/resource"&gt;
-     → &lt;a href="http://192.168.0.87:8011/resource"&gt;
+     <a href="http://site.test/resource">
+     → <a href="http://192.168.0.87:8011/resource">
      ```
 
 ---
@@ -139,5 +136,5 @@ Contributions to enhance functionality or improve performance are welcome! Pleas
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License. See `LICENSE.md` for details.
 
