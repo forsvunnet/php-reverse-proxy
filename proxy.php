@@ -94,6 +94,9 @@ $responseBody = substr($response, $headerSize);
 // Extract the proxy IP from PROXY_BASE_URL
 $parsedProxyBaseUrl = parse_url($proxyBaseUrl);
 $proxyIp = $parsedProxyBaseUrl['host']; // Extract the proxy IP (e.g., 192.168.0.196)
+$proxyScheme = $parsedProxyBaseUrl['scheme']; // Extract the host (e.g., ingrain.test)
+$proxyPort = $parsedProxyBaseUrl['port']; // Extract the proxy port (e.g., 8011)
+$proxyPort = $proxyPort ? ":$proxyPort" : '';
 
 // Extract the host part from targetHost
 $parsedTargetHost = parse_url("http://$targetHost");
@@ -105,14 +108,16 @@ $responseBody = preg_replace_callback(
         '#(https?)://(' . preg_quote($hostOnly, '#') . ')(:\d+)?#', // Match http:// or https:// with optional port
         '#//(' . preg_quote($hostOnly, '#') . ')(:\d+)?#'          // Match protocol-relative URLs with optional port
     ],
-    function ($matches) use ($proxyIp) {
-        $scheme = $matches[1] ?? 'http'; // Preserve the scheme (http or https), default to http
-        $port = $matches[3] ?? '';      // Preserve the original port if present
+    function ($matches) use ($proxyIp, $proxyScheme, $proxyPort) {
+        $scheme = $proxyScheme;
+        $port = $matches[3] ?? $proxyPort;      // Preserve the original port if present
+        if ($port !== $proxyPort) {
+            $scheme = $matches[1] ?? 'http'; // Preserve the scheme (http or https), default to http
+        }
         return $scheme . '://' . $proxyIp . $port;
     },
     $responseBody
 );
-
 
 // Rewrite headers
 $headers = array_filter(explode("\r\n", $responseHeaders));
