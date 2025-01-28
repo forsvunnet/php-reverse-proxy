@@ -4,7 +4,7 @@ This project provides a simple single-file PHP script to forward local websites 
 
 ## Motivation
 
-The goal of this project is to quickly and easily share a local website (e.g., `localhost`, `site.test`) with other devices on the same network. Unlike tools that require setup or installation, this script is a single-file PHP solution with no external dependencies.
+This script is designed to address challenges with tools like Vite.js, which run their own development servers for features like hot-reloading. Configuring a traditional web server, such as Nginx, to work with such setups can be inconvenient and requires manual adjustments to the site's URL. This script solves the problem by rewriting the site URL to your specified IP address and port, allowing quick and easy testing across devices without additional configuration.
 
 ---
 
