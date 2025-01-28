@@ -55,6 +55,8 @@ $targetUrl = "https://$targetHost$requestUri";
 
 // Initialize cURL
 $ch = curl_init($targetUrl);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -89,13 +91,25 @@ $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 $responseHeaders = substr($response, 0, $headerSize);
 $responseBody = substr($response, $headerSize);
 
-// Replace occurrences of the target host with the proxy base URL in the body
-$responseBody = preg_replace(
+// Extract the proxy IP from PROXY_BASE_URL
+$parsedProxyBaseUrl = parse_url($proxyBaseUrl);
+$proxyIp = $parsedProxyBaseUrl['host']; // Extract the proxy IP (e.g., 192.168.0.196)
+
+// Extract the host part from targetHost
+$parsedTargetHost = parse_url("http://$targetHost");
+$hostOnly = $parsedTargetHost['host']; // Extract the host (e.g., ingrain.test)
+
+// Replace occurrences of the target host with the proxy IP while preserving ports and scheme
+$responseBody = preg_replace_callback(
     [
-        '#https?://' . preg_quote($targetHost, '#') . '#', // Match http:// or https:// followed by the targetHost
-        '#//' . preg_quote($targetHost, '#') . '#'        // Match protocol-relative URLs (e.g., //targetHost)
+        '#(https?)://(' . preg_quote($hostOnly, '#') . ')(:\d+)?#', // Match http:// or https:// with optional port
+        '#//(' . preg_quote($hostOnly, '#') . ')(:\d+)?#'          // Match protocol-relative URLs with optional port
     ],
-    $proxyBaseUrl,
+    function ($matches) use ($proxyIp) {
+        $scheme = $matches[1] ?? 'http'; // Preserve the scheme (http or https), default to http
+        $port = $matches[3] ?? '';      // Preserve the original port if present
+        return $scheme . '://' . $proxyIp . $port;
+    },
     $responseBody
 );
 
@@ -126,4 +140,3 @@ if (!stripos($responseHeaders, 'Content-Length')) {
 // Send HTTP status code and body
 header("HTTP/1.1 $httpStatusCode");
 echo $responseBody;
-
